@@ -1,1 +1,2 @@
 # MasterIceZ.github.io
+*.test
