@@ -1,2 +1,2 @@
 # MasterIceZ.github.io
-*.test
+  - Using HTML. Javascript
