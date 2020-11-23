@@ -1,7 +1,7 @@
 function NewPage() {
-    location.href = './New_Page.html';
+    location.href = '~/New_Page.html';
 }
 
 function BackToIndex() {
-    location.href = './index.html';
+    location.href = '~/index.html';
 }
