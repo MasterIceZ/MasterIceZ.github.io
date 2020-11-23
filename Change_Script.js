@@ -1,3 +1,7 @@
 function NewPage() {
-    location.href("https://www.MasterIceZ.github.io/New_Page.html");
+    location.href = './New_Page.html';
+}
+
+function BackToIndex() {
+    location.href = './index.html';
 }
