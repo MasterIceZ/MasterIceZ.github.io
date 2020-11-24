@@ -1,2 +1,2 @@
 # MasterIceZ.github.io
-  - Using HTML. Javascript
+  - Using HTML. Javascript, Typescript. :octocat:
