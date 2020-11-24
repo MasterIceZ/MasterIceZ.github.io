@@ -19,11 +19,11 @@ function NewAlert(str) {
 function AlertNumber(num) {
     alert(num);
 }
+function PrintCount(cnt) {
+    document.getElementById("Count").innerHTML = cnt;
+}
 function ClickCounting() {
-    //let cnt:number = 1;
     cnt += 1;
-    //let print:string = cnt.toString();
-    AlertNumber(cnt);
-    //Logger(cnt);
+    PrintCount(cnt.toString());
 }
 var cnt = 0;
