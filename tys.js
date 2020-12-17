@@ -25,5 +25,10 @@ function PrintCount(cnt) {
 function ClickCounting() {
     cnt += 1;
     PrintCount(cnt.toString());
+    
+    if(cnt == 69){
+       NewAlert("Nice");
+    }
 }
 var cnt = 0;
+PrintCount(cnt.toString());
