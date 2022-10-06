@@ -1,4 +1,4 @@
-import { Container } from "./component/Container";
+import { Container } from "../components/Container";
 import Head from "next/head";
 import { Text, Flex } from "@chakra-ui/react";
 
@@ -22,6 +22,9 @@ const Index = () => {
 					fontFamily="mono"
 				>
 					Hello World
+				</Text>
+				<Text fontSize="xl" color="#FFFFFF">
+					Test Test 1234
 				</Text>
 			</Flex>
 		</Container>
