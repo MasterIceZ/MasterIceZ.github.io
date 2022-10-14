@@ -21,10 +21,10 @@ const Index = () => {
 					fontWeight="bold"
 					fontFamily="mono"
 				>
-					Hello World
+					This website is under construction.
 				</Text>
-				<Text fontSize="xl" color="#FFFFFF">
-					Test Test 1234
+				<Text fontSize="xl" fontWeight="bold" color="#FFFFFF">
+					but the dev is too lazy :(
 				</Text>
 			</Flex>
 		</Container>
