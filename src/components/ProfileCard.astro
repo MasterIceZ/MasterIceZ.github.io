@@ -1,0 +1,27 @@
+---
+import { Image } from "@astrojs/image/components";
+import { LinkComponent } from "./LinkComponent";
+---
+
+<div class="bg-white rounded-lg shadow-xl h-2/3 w-1/5">
+  <div class="h-1/3 w-full flex justify-center">
+    <div
+      class="h-full w-full bg-gradient-to-br from-pink-200 to-blue-200 rounded-t-lg"
+    >
+    </div>
+  </div>
+  <div class="absolute top-[30%] left-[46%]">
+    <Image
+      src="/my-pic.jpg"
+      alt="Borworntat D."
+      width={150}
+      height={150}
+      class="rounded-full"
+      format="jpg"
+      style={{
+        maxWidth: "100%",
+        height: "auto",
+      }}
+    />
+  </div>
+</div>
