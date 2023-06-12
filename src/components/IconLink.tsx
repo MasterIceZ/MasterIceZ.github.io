@@ -32,7 +32,7 @@ export const IconLink = () => {
         className="hover:bg-slate-200 dark:bg-purple-800 hover:dark:bg-purple-900 rounded-lg p-2"
         target="_blank"
         rel="noopener noreferrer">
-        <TwitterLogo className="text-slate-700 dark:text-gray-100" size={30} />
+        <TwitterLogo className="text-slate-700 dark:text-gray-100" />
       </a>
     </>
   );
