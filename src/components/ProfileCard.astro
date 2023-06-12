@@ -1,27 +1,52 @@
 ---
-import { Image } from "@astrojs/image/components";
-import { LinkComponent } from "./LinkComponent";
+import { FaFacebook, FaGithub, FaInstagram, FaTwitter } from "react-icons/fa";
 ---
 
-<div class="bg-white rounded-lg shadow-xl h-2/3 w-1/5">
-  <div class="h-1/3 w-full flex justify-center">
-    <div
-      class="h-full w-full bg-gradient-to-br from-pink-200 to-blue-200 rounded-t-lg"
-    >
+<div
+  class="bg-gray-100 dark:bg-slate-800 rounded-3xl shadow-xl h-2/3 w-3/4 sm:w-1/4">
+  <div class="flex justify-center h-full w-full items-center flex-col">
+    <img src="/my-pic.jpg" class="rounded-full h-1/3 p-1.5 dark:bg-blue-900" />
+    <div class="mt-7 text-center dark:text-gray-100 text-gray-700">
+      <h1 class="font-bold text-2xl hidden sm:flex">
+        Borworntat Dendumrongkul
+      </h1>
+      <h1 class="font-bold text-2xl sm:hidden">Borworntat D.</h1>
+      <h2 class="font-semibold text-xl">"Icy"</h2>
+
+      <div class="mt-5">
+        <p class="text-xl">Student @ Rayongwittayakom</p>
+        <p class="text-lg dark:text-gray-300 text-gray-600">Class of 2023</p>
+      </div>
     </div>
-  </div>
-  <div class="absolute top-[30%] left-[46%]">
-    <Image
-      src="/my-pic.jpg"
-      alt="Borworntat D."
-      width={150}
-      height={150}
-      class="rounded-full"
-      format="jpg"
-      style={{
-        maxWidth: "100%",
-        height: "auto",
-      }}
-    />
+    <div class="w-full text-xl mt-10 flex justify-center gap-5">
+      <a
+        href="https://github.com/MasterIceZ"
+        class="hover:bg-slate-200 dark:bg-purple-800 hover:dark:bg-purple-900 rounded-lg p-2"
+        target="_blank"
+        rel="noopener noreferrer">
+        <FaGithub className="text-slate-700 dark:text-gray-100" size={30} />
+      </a>
+      <a
+        href="https://www.instagram.com/iicxx.exe_/?hl=th"
+        class="hover:bg-slate-200 dark:bg-purple-800 hover:dark:bg-purple-900 rounded-lg p-2"
+        target="_blank"
+        rel="noopener noreferrer">
+        <FaInstagram className="text-slate-700 dark:text-gray-100" size={30} />
+      </a>
+      <a
+        href="https://www.facebook.com/Borworntat.D/"
+        class="hover:bg-slate-200 dark:bg-purple-800 hover:dark:bg-purple-900 rounded-lg p-2"
+        target="_blank"
+        rel="noopener noreferrer">
+        <FaFacebook className="text-slate-700 dark:text-gray-100" size={30} />
+      </a>
+      <a
+        href="https://twitter.com/_ibwt"
+        class="hover:bg-slate-200 dark:bg-purple-800 hover:dark:bg-purple-900 rounded-lg p-2"
+        target="_blank"
+        rel="noopener noreferrer">
+        <FaTwitter className="text-slate-700 dark:text-gray-100" size={30} />
+      </a>
+    </div>
   </div>
 </div>
