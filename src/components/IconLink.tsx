@@ -1,7 +1,7 @@
-import { GithubLogo } from "../../svg/Github";
-import { FacebookLogo } from "../../svg/Facebook";
-import { InstagramLogo } from "../../svg/Instagram";
-import { TwitterLogo } from "../../svg/Twitter";
+import { GithubLogo } from "@/assets/Github";
+import { FacebookLogo } from "@/assets/Facebook";
+import { InstagramLogo } from "@/assets/Instagram";
+import { TwitterLogo } from "@/assets/Twitter";
 
 export const IconLink = () => {
   return (

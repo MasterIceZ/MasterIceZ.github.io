@@ -1,0 +1,130 @@
+---
+layout: "@/layouts/PostLayout.astro"
+title: "Transformation in Computer Graphics"
+date: "24-09-2024"
+---
+
+## พิกัดของจุดในสามมิติ
+
+ในระบบพิกัดที่พบเห็นได้ทั่วไป เราสามารถนิยามจุด $p$ ใด ๆ ในสามมิติ ได้ด้วยจำนวนจริง $x, y, z$ ในรูปแบบ $(x, y, z)$
+
+นอกจากการเขียนในรูปแบบ $(x, y, z)$ แล้ว เรายังสามารถเขียนในรูปแบบของเวกเตอร์ได้ด้วย โดยใช้เวกเตอร์หนึ่ง ๆ ที่มีขนาดเท่ากับ 3 และมีค่าเป็นจำนวนจริง 3 ตัว ซึ่งเราสามารถเขียนในรูปแบบ$$\begin{bmatrix} x \\ y \\ z \end{bmatrix}$$
+
+## การแปลงของจุดในสามมิติ
+
+การแปลงเบื้องต้นในสามมิติ มีอยู่ 5 รูปแบบได้แก่
+
+- Translation (การเลื่อนที่)
+- Scaling (การหด/ขยาย)
+- Rotation (การหมุน)
+- Shear (การเอียง)
+- Reflection (การสะท้อน)
+
+ในการแปลงรูปแบบ Scaling, Rotation, Shear, Reflection สามารถใช้ Matrix ในการแปลงได้โดยตรงผ่านการคูณ Matrix เข้ากับเวกเตอร์ของจุดนั้น ๆ
+
+### Translation
+
+การเลื่อนที่ของจุดในสามมิติสามารถทำได้โดยง่ายด้วยการบวกเวกเตอร์ของจุดนั้น ๆ ด้วยเวกเตอร์ของขนาดของการเลื่อนที่ ซึ่งเราสามารถเขียนในรูปแบบของ Matrix ได้ดังนี้
+
+$$
+\begin{bmatrix} x\\y\\z \end{bmatrix} + \begin{bmatrix} t_x\\t_y\\t_z \end{bmatrix} = \begin{bmatrix} x'\\y'\\z' \end{bmatrix}
+$$
+
+### Scaling, Rotation, Shear และ Reflection
+
+ในการแปลงรูปแบบ Scaling, Rotation, Shear และ Reflection สามารถใช้ Matrix ในการแปลงได้โดยตรงผ่านการคูณ Matrix เข้ากับเวกเตอร์ของจุดนั้น ๆ ซึ่งเราสามารถเขียนในรูปแบบของ Matrix ได้ดังนี้
+
+$$
+\begin{bmatrix} a & b & c\\d & e & f\\g & h & i \end{bmatrix} \begin{bmatrix} x\\y\\z \end{bmatrix} = \begin{bmatrix} x'\\y'\\z' \end{bmatrix}
+$$
+
+## การรวมการแปลง
+
+เนื่องจากการคูณ Matrix สามารถรวมกันก่อนแล้วนำมาคูณกับจุดที่ต้องการแปลงได้ในคราวเดียว ดังนั้นเราสามารถเขียนในรูปแบบของ Matrix ได้ เช่น
+
+$A$ เป็นเวกเตอร์ที่ใช้ในการหมุนจุดในสามมิติ โดยที่ $\theta$ คือมุมที่ต้องการหมุนรอบแกน z
+
+$$
+A = \begin{bmatrix} \cos{\theta} & -\sin{\theta} & 0\\ \sin{\theta} & \cos{\theta} & 0\\ 0 & 0 & 1 \end{bmatrix}
+$$
+
+$B$ เป็นเวกเตอร์ที่ใช้ในการขยายจุดในสามมิติ โดยที่ 2 คือขนาดของการขยาย
+
+$$
+B = \begin{bmatrix} 2 & 0 & 0\\ 0 & 2 & 0\\ 0 & 0 & 2 \end{bmatrix}
+$$
+
+เราสามารถคูณ Matrix 2 อันนี้เข้าด้วยกันได้เพื่อให้ได้ Matrix ที่ใช้ในการหมุนและขยายจุดในสามมิติได้
+
+$$
+A \times B = \begin{bmatrix} 2\cos{\theta} & -2\sin{\theta} & 0\\ 2\sin{\theta} & 2\cos{\theta} & 0\\ 0 & 0 & 2 \end{bmatrix}
+$$
+
+แล้วสามารถนำมาคูณกับเวกเตอร์ของจุดที่ต้องการแปลงได้
+
+$$
+\begin{bmatrix} 2\cos{\theta} & -2\sin{\theta} & 0\\ 2\sin{\theta} & 2\cos{\theta} & 0\\ 0 & 0 & 2 \end{bmatrix} \begin{bmatrix} x\\y\\z \end{bmatrix} = \begin{bmatrix} 2x\cos{\theta} - 2y\sin{\theta}\\2x\sin{\theta} + 2y\cos{\theta}\\2z \end{bmatrix}
+$$
+
+แต่หากในกรณีที่มีการเลื่อนเข้ามาด้วยจะทำให้คำนวณได้ลำบากอย่างมาก
+
+$C เป็นเวกเตอร์ที่ใช้ในการเลื่อนจุดในสามมิติ
+
+$$
+C = \begin{bmatrix} 3\\4\\5 \end{bmatrix}
+$$
+
+เมื่อทำการขยายขนาดด้วย $B$ จากนั้นเลื่อนที่ด้วย $C$ แล้ว หลังจากนั้นจึงหมุนด้วย $A$ จะได้
+
+$$
+\begin{aligned}
+  ((B \times \begin{bmatrix} x\\y\\z \end{bmatrix}) + C) \times A &= (\begin{bmatrix} 2x\\2y\\2z \end{bmatrix} + \begin{bmatrix} 3\\4\\5 \end{bmatrix}) \times \begin{bmatrix} \cos{\theta} & -\sin{\theta} & 0\\ \sin{\theta} & \cos{\theta} & 0\\ 0 & 0 & 1 \end{bmatrix}\\
+  &= \begin{bmatrix} 2x + 3\\2y + 4\\2z + 5 \end{bmatrix} \times \begin{bmatrix} \cos{\theta} & -\sin{\theta} & 0\\ \sin{\theta} & \cos{\theta} & 0\\ 0 & 0 & 1 \end{bmatrix}\\
+  &= \begin{bmatrix} (2x + 3)\cos{\theta} - (2y + 4)\sin{\theta}\\(2x + 3)\sin{\theta} + (2y + 4)\cos{\theta}\\2z + 5 \end{bmatrix}
+\end{aligned}
+$$
+
+ซึ่งสังเกตได้ว่าในการแปลงจุดหนึ่งครั้งต้องทำงานหลายขั้นตอน และหากมีการเปลี่ยนแปลงจำนวนขั้นตอน จะทำให้การคำนวณเพิ่มขึ้นอย่างมาก
+
+## การใช้ Matrix ในการแปลง
+
+ใน Linear Algebra เราสามารถใช้ Matrix ขนาด $4 \times 4$ มาช่วยในการแปลงจุดในสามมิติได้ โดยที่ Matrix นี้จะมีรูปแบบดังนี้
+
+$$
+\begin{bmatrix} sr_{(1,1)} & sr_{(1, 2)} & sr_{(1, 3)} & t_x \\sr_{(2, 1)} & sr_{(2, 2)} & sr_{(2, 3)} & t_y\\sr_{(3, 1)} & sr_{(3, 2)} & sr_{(3, 3)} & t_z\\0 & 0 & 0 & 1 \end{bmatrix}
+$$
+
+สังเกตว่าหลังจากการเพิ่มมิติให้กับ Matrix แล้วจะทำให้สามารถเขียนการเลื่อนที่ไว้ในมิติที่เพิ่มเข้ามาใหม่ได้ จึงทำให้สามารถทำการแปลงจุดในสามมิติได้โดยง่ายขึ้น โดยแทนที่จะเลื่อนที่ด้วยการบวกสามารถใช้การคูณ Matrix ได้โดยตรง เช่น
+
+$T_v$ เป็นเวกเตอร์ที่ใช้ในการเลื่อนที่ และ $T_m$ เป็น Matrix ที่ใช้ในการเลื่อนที่จุดในสามมิติที่มีความหมายเทียบเท่ากับ $T_v$
+
+$$
+\begin{aligned}
+  T_v &= \begin{bmatrix} 3\\4\\5 \end{bmatrix}\\
+  T_v + \begin{bmatrix} x\\y\\z \end{bmatrix} &= \begin{bmatrix} 3\\4\\5 \end{bmatrix} + \begin{bmatrix} x\\y\\z \end{bmatrix} \\
+  &= \begin{bmatrix} x + 3\\y + 4\\z + 5 \end{bmatrix}
+\end{aligned}
+$$
+
+จากการคำนวณด้านบน สามารถเขียนในรูปแบบของ Matrix ได้ดังนี้
+
+$$
+\begin{aligned}
+  T_m &= \begin{bmatrix} 1 & 0 & 0 & 3\\0 & 1 & 0 & 4\\0 & 0 & 1 & 5\\0 & 0 & 0 & 1 \end{bmatrix}\\
+  T_m \times \begin{bmatrix} x\\y\\z\\1 \end{bmatrix} &= \begin{bmatrix} 1 & 0 & 0 & 3\\0 & 1 & 0 & 4\\0 & 0 & 1 & 5\\0 & 0 & 0 & 1 \end{bmatrix} \times \begin{bmatrix} x\\y\\z\\1 \end{bmatrix}\\
+  &= \begin{bmatrix} x + 3\\y + 4\\z + 5\\1 \end{bmatrix}
+\end{aligned}
+$$
+
+ซึ่งสามารถเทียบเคียงกันได้
+
+## สรุป
+
+เราสามารถเขียน Matrix ในรูปแบบของการแปลงจุดในสามมิติได้ดังนี้
+
+$$
+\begin{bmatrix} sr_{(1,1)} & sr_{(1, 2)} & sr_{(1, 3)} & t_x \\sr_{(2, 1)} & sr_{(2, 2)} & sr_{(2, 3)} & t_y\\sr_{(3, 1)} & sr_{(3, 2)} & sr_{(3, 3)} & t_z\\0 & 0 & 0 & 1 \end{bmatrix} \times \begin{bmatrix} x\\y\\z\\1 \end{bmatrix} =
+\begin{bmatrix} sr_{(1,1)}x + sr_{(1, 2)}y + sr_{(1, 3)}z + t_x\\sr_{(2, 1)}x + sr_{(2, 2)}y + sr_{(2, 3)}z + t_y\\sr_{(3, 1)}x + sr_{(3, 2)}y + sr_{(3, 3)}z + t_z \\1 \end{bmatrix}
+$$
+
+เพื่อให้ง่ายต่อการคำนวณและลดจำนวนขั้นตอนที่ต้องทำในการแปลงจุดในสามมิติ
