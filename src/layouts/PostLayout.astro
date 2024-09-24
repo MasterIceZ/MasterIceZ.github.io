@@ -5,7 +5,7 @@ import "@fontsource/fira-sans";
 const { frontmatter } = Astro.props;
 ---
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -21,7 +21,7 @@ const { frontmatter } = Astro.props;
   </head>
   <body>
     <div
-      class="flex flex-col justify-center min-h-screen py-[4rem] md:py-[6rem] w-full">
+      class="flex flex-col justify-center min-h-screen py-[4rem] md:pt-[6rem] w-full">
       <h1 class="font-bold text-4xl pb-6 text-center">{frontmatter.title}</h1>
       <h2 class="italic text-center text-gray-500">{frontmatter.date}</h2>
       <article
@@ -29,6 +29,10 @@ const { frontmatter } = Astro.props;
         <slot />
       </article>
     </div>
+    <footer
+      class="text-center mb-[4rem] text-lg text-[#0000EE] hover:underline">
+      <a href="/garden/posts">Back to Garden's Posts List</a>
+    </footer>
   </body>
 </html>
 
@@ -40,8 +44,15 @@ const { frontmatter } = Astro.props;
     font-family: "IBM Plex Sans Thai", sans-serif;
   }
   code {
-    font-family: Menlo, Monaco, Lucida Console, Liberation Mono,
-      DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
+    font-family:
+      Menlo,
+      Monaco,
+      Lucida Console,
+      Liberation Mono,
+      DejaVu Sans Mono,
+      Bitstream Vera Sans Mono,
+      Courier New,
+      monospace;
   }
   .prose {
     max-width: 80%;
