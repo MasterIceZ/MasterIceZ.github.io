@@ -5,6 +5,12 @@ date: "09-07-2023"
 description: "Competitive Programming 101: Slope Trick"
 ---
 
+import st_1 from "@/assets/posts/090723/st-1.png";
+import st_2 from "@/assets/posts/090723/st-2.png";
+import st_3 from "@/assets/posts/090723/st-3.png";
+import st_4 from "@/assets/posts/090723/st-4.png";
+import st_5 from "@/assets/posts/090723/st-5.png";
+
 ## Properties
 
 สมบัติของฟังก์ชันที่ทำ Slope Trick ได้
@@ -24,20 +30,20 @@ _ข้อสังเกต_ ฟังก์ชันที่ทำ Slope Tric
 ในการเก็บเส้น $f_1(x)=|10-x|$ นั้นจะเก็บจุดตัดเป็น $[D] = \{10, 10\}$
 
 <center>
-  <img src="/src/assets/posts/090723/st-1.png" width="60%" />
+  <img src={st_1.src} width="60%" />
 </center>
 
 ถ้าเพิ่ม $f_2(x)=|8-x|$ เข้าไปอีกเส้นจะทำให้ $D=\{8,8,10,10\}$
 
 <center>
-  <img src="/src/assets/posts/090723/st-2.png" width="60%" />
+  <img src={st_2.src} width="60%" />
 </center>
 
 ฟังก์ชันของสองเส้นนี้รวมกันก็จะเป็น
 $s(x)=f_1(x)- f_2(x)=|10-x| - |8-x|$
 
 <center>
-  <img src="/src/assets/posts/090723/st-3.png" width="60%" />
+  <img src={st_3.src} width="60%" />
 </center>
 
 สังเกตว่า $s(x)$ (เส้นสีม่วง) จะมีจุดเปลี่ยนความชันที่ $8$ และ $10$ และแต่ละครั้งที่เปลี่ยนคือ
@@ -75,7 +81,7 @@ $$
 พิจารณา f_2(x)=|10-x|+|8-x|
 
 <center>
-  <img src="/src/assets/posts/090723/st-3.png" width="60%" />
+  <img src={st_3.src} width="60%" />
 </center>
 
 สังเกตเส้น $l_1 = |10 - x|$ (เส้นสีแดง) และ $l_2 = |8 - x|$ (เส้นฟ้า) เมื่อรวมกันจะได้ $f_2(x)$ (เส้นสีม่วง) พอดี
@@ -83,7 +89,7 @@ $$
 จากนั้นเมื่อใส่ $l_3 = |9 - x|$ เข้าไปจะได้
 
 <center>
-  <img src="/src/assets/posts/090723/st-4.png" width="60%" />
+  <img src={st_4.src} width="60%" />
 </center>
 
 $l_3$ (เส้นสีเหลือง) เมื่อรวมเข้ากับ $f_2(x)$ จะได้ $f_3(x)$ (เส้นสีดำ) และเมื่อพิจารณาจุดที่ต่ำที่สุดของ $f_3(x)$ จะได้ค่ามัธยฐานของ $A_i$ ซึ่งมีค่าเท่ากับ $9$ และเมื่อแทน $x = 9$ ลงไปใน $f_3(x)$ จะได้ค่า $y$ ที่น้อยที่สุดที่เป็นไปได้ ซึ่งเท่ากับ $2$
@@ -115,7 +121,7 @@ $g_i(x) :=$ จำนวน operation ที่น้อยที่สุดท
 $g_i(x) = \min_{x - h \le k \le x + h} \{f_{i-1}(k)\}$ ทำให้ $f_i(x) = |A_i - x| + g_{i - 1}(x)$
 
 <center>
-  <img src="/src/assets/posts/090723/st-5.png" width="60%" />
+  <img src={st_5.src} width="60%" />
 </center>
 
 สังเกตว่า $f_{1}(x)$ เป็นเส้นสีแดงและ $g_{1}(x)$ เป็นเส้นสีฟ้า เนื่องจาก $g_{1}(x)$ เป็นจำนวน operation ที่น้อยที่สุดที่ยังถูกเงื่อนไขเมื่อ $A_{1} = x$ กล่าวคือเป็น $f_1(x)$ ที่ขยายไปทางซ้าย $-h$ และทางขวา $+h$
