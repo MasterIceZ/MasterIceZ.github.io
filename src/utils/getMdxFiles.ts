@@ -25,5 +25,5 @@ export function getMdxFiles(dir: string) {
         frontmatter: data,
       };
     })
-    .sort((a, b) => b.date - a.date);
+    .sort((a, b) => b.date.getTime() - a.date.getTime());
 }
