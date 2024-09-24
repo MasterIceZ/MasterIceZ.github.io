@@ -10,6 +10,9 @@ export function getMdxFiles(dir: string) {
       const filePath = path.join(dir, file);
       const content = fs.readFileSync(filePath, "utf-8");
       const { data } = matter(content);
+      if (data.privacy === "private") {
+        return null;
+      }
       const [datePart, ...nameParts] = file.split("-");
       const date = new Date(
         parseInt(datePart.slice(4, 6), 10) + 2000, // Year
@@ -25,5 +28,6 @@ export function getMdxFiles(dir: string) {
         frontmatter: data,
       };
     })
+    .filter((file) => file !== null)
     .sort((a, b) => b.date.getTime() - a.date.getTime());
 }

@@ -24,6 +24,15 @@ const posts = getMdxFiles("./src/pages/garden/posts");
                   href={`/garden/posts/${post.fileName.replace(".mdx", "")}`}>
                   {post.frontmatter.title} ({post.frontmatter.date})
                 </a>
+                <p class="italic text-gray-600">
+                  tags:{" "}
+                  {post.frontmatter.tags.map((tag: string, index: number) => (
+                    <span>
+                      {tag}
+                      {index !== post.frontmatter.tags.length - 1 ? ", " : ""}
+                    </span>
+                  ))}
+                </p>
                 <p class="text-md">&emsp;{post.frontmatter.description}</p>
               </div>
             ))
