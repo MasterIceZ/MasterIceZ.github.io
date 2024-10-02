@@ -1,6 +1,10 @@
 ---
+import { ViewTransitions } from "astro:transitions";
+
 import "@fontsource/ibm-plex-sans-thai";
+import "@fontsource/ibm-plex-sans-thai/700.css";
 import "@fontsource/fira-sans";
+import "@fontsource/fira-sans/700.css";
 
 const { frontmatter } = Astro.props;
 ---
@@ -18,8 +22,9 @@ const { frontmatter } = Astro.props;
     />
     <meta name="generator" content={Astro.generator} />
     <title>Garden | {frontmatter.title}</title>
+    <ViewTransitions />
   </head>
-  <body>
+  <body transition:animate="slide">
     <div
       class="flex flex-col justify-center min-h-screen py-[4rem] md:pt-[6rem] w-full">
       <h1 class="font-bold text-4xl pb-6 text-center">{frontmatter.title}</h1>
@@ -38,7 +43,7 @@ const { frontmatter } = Astro.props;
 
 <style is:global>
   body {
-    font-family: "Fira Sans", sans-serif;
+    font-family: "IBM Plex Sans Thai", "Fira Sans", sans-serif;
   }
   :lang(th) {
     font-family: "IBM Plex Sans Thai", sans-serif;
@@ -71,6 +76,11 @@ const { frontmatter } = Astro.props;
     .katex {
       display: inline-block;
       max-width: 100%;
+    }
+    .lemma-box {
+      overflow-x: auto;
+      max-width: 100%;
+      white-space: nowarp;
     }
   }
 </style>
