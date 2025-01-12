@@ -1,0 +1,159 @@
+---
+layout: "@/layouts/PostLayout.astro"
+title: "Maximum Flow"
+date: "27-09-2024"
+description: "Max Flow for Competitive Programming (IOI & ICPC)"
+privacy: private
+tags: ["Competitive Programming"]
+---
+
+import TheoremBox from "@/components/garden/TheoremBox.astro";
+import LemmaBox from "@/components/garden/LemmaBox.astro";
+
+import mf_1 from "@/assets/posts/270924/mf-1.jpeg";
+import mf_2 from "@/assets/posts/270924/mf-2.jpeg";
+import mf_3 from "@/assets/posts/270924/mf-3.jpeg";
+import mf_4 from "@/assets/posts/270924/mf-4.jpeg";
+
+## Introduction
+
+ปัญหา Maximum Flow เป็นปัญหาที่เกี่ยวกับกราฟ (หรือเรียกว่า network) $G = (V, E)$ โดยที่มีเส้นเชื่อมเปรียบเสมือนท่อน้ำโดยแต่ละเส้นมีความจุของท่อที่อาจจะไม่เท่ากัน
+
+<center>
+  <img src={mf_1.src} width="60%" />
+</center>
+
+ต้องการหาว่าสามารถปล่อยน้ำจากจุดยอด $s$ ไปยังจุดยอด $t$ ได้มากที่สุดเท่าไหร่
+
+## Terminology
+
+Capacity ($c$) คือ ปริมาณน้ำที่มากที่สุดที่ท่อสามารถรับได้
+
+Flow ($f$) คือ ปริมาณน้ำจากจุดยอด $s$ ไปจุดยอด $t$ ผ่านท่อต่าง ๆ ระหว่างทาง โดยหลักการของ Flow คือ
+
+1. Flow ที่ผ่านท่อใด ๆ จะต้องไม่เกิน Capacity ของท่อนั้น ๆ
+2. สำหรับจุดยอด $u$ ที่ไม่ใช่ $s$ และ $t$ ปริมาณน้ำที่ไหลเข้าจะต้อง**เท่ากับ**ปริมาณน้ำที่ไหลออก
+3. Flow ของกราฟ $G$ จะต้องไม่ติดลบ
+
+## Algorithms
+
+Algorithm ในการแก้ปัญหา Maximum Flow มีอยู่หลายวิธีโดย Algorithm ใหม่ ๆ ของ Maximum Flow ก็ยังถูกคิดค้นออกมาเรื่อย ๆ ในปัจจุบัน
+
+ในส่วนของ Blog นี้จะเขียนเกี่ยวกับ Algorithm ที่นิยมใช้สำหรับ Competitive Programming เป็นหลัก ได้แก่
+
+1. Ford-Fulkerson Algorithm
+2. Edmonds-Karp Algorithm
+3. Dinic's Algorithm (for ICPC)
+
+## Ford-Fulkerson Algorithm
+
+### Terminology
+
+Residual Graph ($G^r$) คือ กราฟที่เหลือหลังจาก flow ก่อนหน้าถูกคำนวณแล้ว โดยที่ท่อที่มีความจุเต็มแล้วจะถูกลบออก (หรือไม่ถูกพิจารณา) และมีสมบัติ  
+สำหรับ ท่อ $(u, v) \in G$
+
+- $c_f^r(u, v) = c_f(u, v) - f(u, v)$
+- $c_f^r(v, u) = f(u, v)$
+
+Residual Capacity คือ ความจุที่เหลือของท่อ ($c$ - $f$ ที่ผ่านท่อนั้น ๆ)
+
+Augmenting Path คือ เส้นทางที่เริ่มจากจุดยอด $s$ และจบที่จุดยอด $t$ โดยที่ยังสามารถเพิ่ม Flow ได้ เมื่อ Flow ที่เพิ่มไม่เกิน Residual Capacity ที่น้อยที่สุดของท่อในเส้นทางนั้น
+
+<TheoremBox title="Augmenting Path Theorem">
+  A flow $f$ is a maximum flow if and only if there is no remaining augmenting
+  path in the residual graph.
+</TheoremBox>
+
+### Algorithm
+
+> ตราบใดที่ยังมี Augmenting Path เหลืออยู่ใน $G^r$ ก็จะทำการเพิ่ม Flow ตาม Residual Capacity ที่น้อยที่สุดบน Path นั้น ๆ จนกว่าจะไม่มี Augmenting Path อีกต่อไป
+
+```
+flow = 0
+WHILE there is augmenting path P in the residual graph:
+  flow += min(residual capacity of P)
+  update residual graph
+RETURN flow
+```
+
+Time Complexity: $O(|E| \cdot f)$ โดยที่ $f$ คือค่าของ Maximum Flow
+
+ตัวอย่างการทำงาน
+
+กำหนดให้ทุกท่อมี flow ที่ผ่านเป็น 0
+
+<center>
+  <img src={mf_2.src} width="60%" />
+</center>
+
+หา Augmenting Path มา 1 Path
+
+<center>
+  <img src={mf_3.src} width="60%" />
+</center>
+
+เพิ่ม Flow ตาม Residual Capacity ที่น้อยที่สุด
+
+<center>
+  <img src={mf_4.src} width="60%" />
+</center>
+
+ทำเช่นนี้ไปเรื่อย ๆ จนกว่าจะไม่มี Augmenting Path ที่เหลือ
+
+## Edmonds-Karp Algorithm
+
+วิธีการทำงานของ Edmonds-Karp เหมือนกับ Ford-Fulkerson แต่ในการเลือก Augmenting Path ในแต่ละครั้งจะเลือก Shortest Path (Graph นี้ถือว่าไม่มี Weight) ที่เหลืออยู่ใน Residual Graph โดยใช้ Breadth First Search (BFS)
+
+[Sample Code](https://gist.github.com/MasterIceZ/3c002e5fe6c33790daee77f9e30dbafa)
+
+Time Complexity: $O(|V| \cdot |E|^2)$
+
+## Dinic's Algorithm
+
+Dinic's Algorithm เป็นวิธีที่นิยมใช้ในการแก้ปัญหา Maximum Flow ในการแข่งขันระดับ ICPC เนื่องจากมีประสิทธิภาพเชิงเวลาที่ดีกว่า Edmonds-Karp และ Ford-Fulkerson
+
+### Terminology
+
+Level Graph คือ กราฟที่เกิดจากการทำ BFS บน Residual Graph โดยที่ Level ของจุดยอด $u$ คือ ความยาวของ Shortest Path จากจุดยอด $s$ ไปยัง $u$
+
+Blocking Flow คือ
+
+### Algorithm
+
+Dinic's Algorithm มีขั้นตอนดังนี้
+
+1. สร้าง Level Graph ด้วยการ BFS จากจุดยอด $s$ บน Residual Graph
+2. DFS บน Residual Graph เพื่อส่ง Flow ไปเรื่อย ๆ จนกว่าจะเกิด Blocking Flow
+3. สร้าง Level Graph ใหม่ในกรณีที่เจอ Blocking Flow และทำซ้ำขั้นตอน 2 จนกว่าจะไม่มี Blocking Flow อีกต่อไป
+
+Time Complexity: $O(|V|^2 \cdot |E|)$
+
+## Interesting Applications
+
+### Maximum Bipartite Matching
+
+### Minimum Cut
+
+Cut คือ การแบ่งกราฟ $G$ ออกเป็นสองส่วนด้วยการลบเส้นเชื่อมบางเส้นออก
+
+$s-t$ Cut คือ Cut ที่แบ่งกราฟ $G$ ออกเป็นสองส่วน โดยที่จุดยอด $s$ และจุดยอด $t$ อยู่คนละส่วนกัน
+
+Minimum Cut คือ Cut ที่ได้จากการลบเส้นเชื่อมให้มีผลรวม Capacity ของเส้นที่ลบออกมีค่าน้อยที่สุด
+
+<LemmaBox>$v(f) \le c(A, B)$ เมื่อ $v(f)$ คือผลรวมของ flow $f$</LemmaBox>
+
+<details>
+  <summary>Proof</summary>
+</details>
+
+<TheoremBox title="Max Flow-Min Cut Theorem">
+  The value of the maximum flow is equal to the capacity of the minimum cut.
+</TheoremBox>
+
+<details>
+  <summary>Proof</summary>
+</details>
+
+## Notes
+
+สามารถเข้าไปดูการทำงานของ Algorithm ได้ที่ [Visualgo](https://visualgo.net/en/maxflow) เพื่อความเข้าใจที่ดีขึ้น

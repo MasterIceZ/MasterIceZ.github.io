@@ -1,0 +1,52 @@
+---
+layout: "@/layouts/PostLayout.astro"
+title: "Simple? Linear Programming"
+date: "xxxxxxx"
+description: "Linear Programming Notes"
+privacy: private
+tags: ["Optimization", "Math"]
+---
+
+## Standard From
+
+$$
+\begin{aligned}
+\text{Maximize} & \quad c^T x \\
+\text{Subject to} & \quad Ax \leq b \\
+& \quad x \geq 0
+\end{aligned}
+$$
+
+## Julia Code
+
+```julia
+using JuMP, Clp # Package for solving linear programming problems
+using NamedArrays # Package for creating named arrays
+
+model = Model(Clp.Optimizer)
+
+sports = [:football, :soccer]
+ingredients = [:wood, :plaque, :brass_football, :brass_soccer]
+profit = Dict(zip(sports, [12, 9])) # Profit for each sport
+quantity_available = Dict(zip(ingredients, [4800, 1750, 1000, 1500])) # Quantity available for each ingredient
+
+recipe_matrix = [4 1 1 0; 2 1 0 1]
+recipe = NamedArrays(recipe_matrix, (sports, ingredients), ("sports", "ingredients"))
+
+@variable(model, trophies[sports] >= 0) # Number of trophies to produce for each sport
+@expression(model, total_profit, sum(profit[sport] * trophies[sport] for sport in sports))
+@constraint(model, constr[i in ingredients], sum(recipe[sport, i] * trophies[sport] for sport in sports) <= quantity_available[i])
+@objective(model, Max, total_profit)
+
+optimize!(model)
+status = termination_status(model)
+
+if status == MOI.OPTIMAL
+  for sport in sports
+    println(s, ": ", value(trophies[sport]))
+  end
+  println("Total profit: ", objective_value(model))
+else
+  println("No optimal solution found")
+end
+```

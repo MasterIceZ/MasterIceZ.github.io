@@ -1,0 +1,52 @@
+---
+import StudyLayout from "@/layouts/StudyLayout.astro";
+
+import { courseData } from "@/data/courseData";
+
+function createRepoLink(repo: string) {
+  return `https://github.com/MasterIceZ/${repo}`;
+}
+---
+
+<StudyLayout>
+  <div class="flex flex-col items-center justify-center h-screen">
+    <h1 class="text-4xl font-bold">Study</h1>
+    <p class="mt-4 text-lg">Repositories Archive</p>
+    <table class="mt-3 border-collapse border border-gray-400">
+      <thead>
+        <tr class="border border-gray-400">
+          <th class="text-center border border-gray-400 px-3">Course Code</th>
+          <th class="text-center border border-gray-400 px-3">Subject</th>
+          <th class="text-center border border-gray-400 px-3">Repository</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          courseData.map((course) => {
+            return (
+              <tr class="px-3 border border-gray-400">
+                <td class="text-center border border-gray-400 px-3 py-2">
+                  {course.code}
+                </td>
+                <td class="border border-gray-400 px-3 py-2">
+                  {course.subject}
+                </td>
+                <td class="text-slate-600 underline">
+                  <div class="flex flex-col py-2 gap-y-1 px-3">
+                    {course.repository.map((repo) => {
+                      return (
+                        <a href={createRepoLink(repo)} target="_blank">
+                          {repo}
+                        </a>
+                      );
+                    })}
+                  </div>
+                </td>
+              </tr>
+            );
+          })
+        }
+      </tbody>
+    </table>
+  </div>
+</StudyLayout>
