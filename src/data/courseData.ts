@@ -40,4 +40,9 @@ export const courseData = [
     subject: "Hardware Synthesis Laboratory I",
     repository: ["2110363"],
   },
+  {
+    code: 2110514,
+    subject: "Realtime Computer Graphics and Physics Simulation",
+    repository: ["2110514"],
+  },
 ] as ICourse[];
