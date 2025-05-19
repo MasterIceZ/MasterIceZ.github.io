@@ -1,0 +1,56 @@
+---
+layout: "@/layouts/PostLayout.astro"
+title: "Homogeneous Linear Recurrence Relation"
+date: "11-02-2025"
+description: "Homogeneous Linear Recurrence Relation"
+privacy: public
+tags: ["Competitive Programming", "Math"]
+---
+
+## Homogeneous Linear Recurrence Relation
+
+Homogeneous Linear Recurrence Relation คือ สมการเวียนเกิดเชิงเส้นที่มีความสัมพันธ์เชิงเส้นระหว่างสมาชิกในลำดับ โดยสมการเวียนเกิดเชิงเส้นที่เป็น Homogeneous จะมีรูปแบบดังนี้
+
+$$
+a_{n} = c_{1}a_{n-1} + c_{2}a_{n-2} + \dots + c_{k}a_{n-k}
+$$
+
+## Solve with Hands
+
+เนื่องจาก $a_{n} = c_{1}a_{n-1} + c_{2}a_{n-2} + \dots + c_{k}a_{n-k}$ สามารถทำให้อยู่ในรูป $a_{n} = D_{1}r_{1}^{n} + D_{2}r_{2}^{n} + \dots + D_{k}r_{k}^{n}$ โดยที่ $r_{1}, r_{2}, \dots, r_{k}$ คือรากของสมการเชิงเส้นที่เป็น Homogeneous และ $D_{1}, D_{2}, \dots, D_{k}$ คือค่าคงที่ที่ต้องหา
+
+## Solve with Matrix Exponentiation
+
+สำหรับ Homogeneous Linear Recurrence Relation ที่ดีกรี $k$ สามารถใช้การหา Linear Transformation จาก $a_{b}$ ไปยัง $a_{b+k}$ ได้ดังนี้
+
+$$
+\begin{bmatrix}
+a_{b+1} \\
+a_{b+2} \\
+a_{b+3} \\
+\vdots \\
+a_{b+k}
+\end{bmatrix}
+=
+\begin{bmatrix}
+c_{1} & c_{2} & \dots & c_{k-1} & c_{k} \\
+1 & 0 & \dots & 0 & 0 \\
+0 & 1 & \dots & 0 & 0 \\
+\vdots & \vdots & \ddots & \vdots & \vdots \\
+0 & 0 & \dots & 1 & 0
+\end{bmatrix}
+\begin{bmatrix}
+a_{b} \\
+a_{b+1} \\
+a_{b+2} \\
+\vdots \\
+a_{b+k-1}
+\end{bmatrix}
+$$
+
+## Reference
+
+- [Linear Recurrence](https://feog.github.io/dm6.pdf)
+- [Competitive Programmer's Handbook](https://cses.fi/book/book.pdf)
+- [Linear Recurrence Relation](https://cp-algorithms.com/algebra/linear-recurrences.html)
+- [[Tutorial] Solving Linear Recurrences with various methods, Including O(N logN logK) using FFT](https://codeforces.com/blog/entry/97627)
