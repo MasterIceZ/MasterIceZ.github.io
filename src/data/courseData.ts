@@ -43,6 +43,6 @@ export const courseData = [
   {
     code: 2110514,
     subject: "Realtime Computer Graphics and Physics Simulation",
-    repository: ["2110514"],
+    repository: ["2110514", "SPH-FluidSimulation.git"],
   },
 ] as ICourse[];
