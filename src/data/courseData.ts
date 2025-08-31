@@ -17,7 +17,7 @@ export const courseData = [
   },
   {
     code: 2110211,
-    subject: "Data Structure",
+    subject: "Intro to Data Structure",
     repository: ["2110211"],
   },
   {
@@ -43,6 +43,11 @@ export const courseData = [
   {
     code: 2110514,
     subject: "Realtime Computer Graphics and Physics Simulation",
-    repository: ["2110514", "SPH-FluidSimulation.git"],
+    repository: ["2110514", "SPH-FluidSimulation"],
+  },
+  {
+    code: 2110366,
+    subject: "Embedded System Laboratory I",
+    repository: ["2110366"],
   },
 ] as ICourse[];
