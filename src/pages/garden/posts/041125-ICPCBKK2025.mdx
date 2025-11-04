@@ -1,0 +1,115 @@
+---
+layout: "@/layouts/PostLayout.astro"
+title: "I chaired ICPC Regional Bangkok 2025's Technical Committee"
+date: "04-11-2025"
+description: "My experience as the chair of the technical committee for ICPC Regional Bangkok 2025."
+privacy: public
+tags: ["Competitive Programming", "Event"]
+---
+
+import summary from "@/assets/posts/041125/summary.png";
+import lang from "@/assets/posts/041125/lang.png";
+import myteam from "@/assets/posts/041125/myteam.jpg";
+import ioittt from "@/assets/posts/041125/ioittt.jpg";
+
+## Background
+
+In freshman and sophomore years of university, I was competing in ICPC (International Collegiate Programming Contest) as part of my university's team.
+Now, in my junior year, I had the honor of chairing the technical committee for ICPC Regional Bangkok 2025, which took place on November 1-2, 2025, at Chulalongkorn University.
+
+&nbsp;&nbsp;&nbsp;&nbsp;Since 2023, I joined the [Thailand-OI Task Team](https://thailand-oi-task-team.github.io/) as a problem setter for Thailand's [IOI (International Olympiad in Informatics)](https://ioinformatics.org/) team selection contests.
+I gained experience in problem setting and contest organization through that role.
+When my university was going to host ICPC Regional Bangkok 2025, I was invited to join the technical committee as the chair.
+The technical committee is responsible for overall technical aspects of the contest, including contest system setup, network infrastructure, monitoring and support during the contest.
+I gladly accepted the invitation and took on the role.
+
+## Preparation Day
+
+The preparation day was on October 30 - October 31, 2025. On the first day, we set up the contest system, including the main server.
+In the main server was running [Proxmox VE](https://pve.proxmox.com/wiki/Main_Page) to manage virtual machines for various service, including the DOMServer and the main printing core services.
+There was also a LAN cabling work to connect all the contest computers to the network which had been done by another team. I have to thank them for their hard work.
+The network infrastructure was crucial for the smooth operation of the contest, so we made sure everything was set up properly.
+
+&nbsp;&nbsp;&nbsp;&nbsp;On the second day, I configured the Judgehosts to make them able to compile Kotlin code, which was not included in the default DOMjudge Judgehost image.
+I also tested the entire contest system to ensure everything was working properly.
+
+## Dress Rehearsal Day
+
+The dress rehearsal day was on November 1, 2025. On that day, the contestant arrived, and we conducted a mock contest to test the entire system.
+They have to test the submission system, printing system, and balloon running system but on that day we did not have balloon yet. So, we just simulated the balloon running system without actual balloons by distributing candies to the teams instead.
+
+&nbsp;&nbsp;&nbsp;&nbsp;There were some issues during the dress rehearsal that we had to address.
+- Some PCs had not been properly configured the forward proxy so they could neither access the printing server nor the judging system. We fixed the configuration on those PCs.
+- One team reported that their monitor was flickering during the contest. After the contest, we replace the monitor with a new one to ensure it would not happen again during the actual contest. (But it still happened again on the contest day. See below.)
+
+## Contest Day
+
+I arrived at the site early in the morning to ensure everything was set up properly.
+I checked the contest system, network connections, and problem statements to ensure everything was ready for the contestants.
+As the contest started, I monitored the system closely to ensure smooth operation.
+
+&nbsp;&nbsp;&nbsp;&nbsp;The contest ran for 5 hours, during which I coordinated with the technical team to address any issues that arose.
+Fortunately, everything went smoothly, and the contestants were able to focus on solving problems without technical difficulties.
+
+But there are some issues during the contest that I would like to share.
+
+- There were 3 teams reported some hardware issues. Two of them were about the monitors, and one was about the freezing computer. For the monitor issues, we only switch the cable since the day before they reported that, and we have already switched the monitor. And for the freezing computer, we do nothing since it was just 4-5 minutes and the issue never happened again.
+- The balloon runners mixed up the color of the balloons for problem A and B. So, we have to announce the correction to all contestants. We swapped the color of the problems in the DOMjudge system to match the balloons.
+
+## The Resolver
+
+This was the first time I have to run the [Resolver](https://tools.icpc.global/resolver/). I have some issue with the program. Luckily, with the help of my team members, we were able to run the Resolver successfully.
+We figured out the documentation was wrong in some part, so we reported the issue to the [ICPCTools github](https://github.com/icpctools/icpctools/issues/1245).
+
+
+### Awards Ceremony
+
+I was told to give a report about the technical aspects of the contest during the awards ceremony.
+It was a very first public speaking experience for me, and I was very nervous. There was 10 Judgehosts for grading contestants' submissions.
+So, the average waiting time for each submission is very low. The longest wait was only 12 seconds!
+
+<center>
+    <img src={summary.src} width="60%" />
+</center>
+
+I was surprised that there is a team using Java in this contest.
+
+<center>
+    <img src={lang.src} width="60%" />
+</center>
+
+It was very impressive to see the contestants' use of various programming languages.
+
+## Systems
+
+I implemented the balloon running system since the official balloon running system provided by DOMjudge was not flexible enough for our needs.
+There is also printing system that I set up to print out the code for the contestants upon request. Last year, they use website to request the print, but I think it is not very convenient during the contest.
+So, I implemented a simple command-line interface for contestants to request the print directly from their contest computers.
+
+&nbsp;&nbsp;&nbsp;&nbsp;The most difficult part was setting up the forward proxy on each contestant computer to inject the headers for auto-authentication to the print server and the judging system.
+We used [Squid Proxy](http://www.squid-cache.org/) for the forward proxy. We figured out how to configure them easily by using auto generate script from the central server since the network cabling had been done.
+
+&nbsp;&nbsp;&nbsp;&nbsp;The network infrastructure was also crucial for the smooth operation of the contest. We set up a dedicated LAN for the contest computers to ensure stable and fast connections to the contest system.
+There were 2 subnets, one for the contest computers and another for the technical team to manage the contest system. The setting up was done easily since the main services which have to be accessed by both subnets were on the main server (the one running Proxmox VE).
+It can create a virtual network interface for each subnet. So there was no aching to configure network switches.
+
+&nbsp;&nbsp;&nbsp;&nbsp;For the operating system cloning, we used [Clonezilla](https://clonezilla.org/) to clone the contest computer images. It was very efficient and saved us a lot of time during the preparation day.
+
+## Photos
+
+<center>
+    <img src={myteam.src} width="60%" />
+    <p>My Team (Technical Committee)</p>
+</center>
+
+<center>
+    <img src={ioittt.src} width="60%" />
+    <p>Thailand-OI Task Team Members at ICPC Regional Bangkok 2025</p>
+</center>
+
+## Links
+
+- [ICPC Regional Bangkok 2025 Official Website](https://icpc.cp.eng.chula.ac.th/2025/)
+- [ICPC Regional Bangkok 2025 Results](https://icpc-chula.github.io/2025/)
+- [ThaiPBS News Coverage](https://www.thaipbs.or.th/now/content/3321)
+- [Thailand-OI Task Team](https://thailand-oi-task-team.github.io/)
