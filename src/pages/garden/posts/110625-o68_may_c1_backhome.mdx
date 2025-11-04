@@ -1,0 +1,137 @@
+---
+layout: "@/layouts/PostLayout.astro"
+title: "o68_may_c1_backhome Tutorial"
+date: "4-11-2025"
+description: "เฉลยหมาป่ากลับบ้าน (backhome) ค่ายพฤษภา 68"
+privacy: public
+tags: ["Competitive Programming", "Tutorial"]
+---
+
+## โจทย์
+
+มีกราฟ $N$ จุดยอดและ $M$ เส้นเชื่อม
+แต่ละเส้นเชื่อมจะมีน้ำหนัก $C_{i} \cdot (H_{u_i} - H_{v_i})^2$
+สำหรับเส้นเชื่อม $i$ ที่เชื่อมระหว่าง $u_i$ และ $v_i$ และมีสัมประสิทธ์ $C_{i}$
+
+ในการเดินทางสามารถใช้เครื่องวาร์ปในการเดินทางได้ $1$ ครั้ง โดยเครื่องวาร์ปจะทำให้เราสามารถเดินทางจาก
+จุดยอด $u$ ไปยังจุดยอด $v$ ได้โดยเสียค่าใช้จ่าย $K \cdot (H_{u} - H_{v})^2$
+
+ต้องการหาระยะทางที่สั้นที่สุดจากจุดยอด $s$ ไปยังจุดยอด $t$
+
+## ปัญหาย่อย $N \le 1\,000$ และ $M \le 2,000$
+
+ในปัญหายาอยนี้สามารถใช้ Dijkstra's Algorithm ในการหาระยะทางที่สั้นที่สุดจากจุดยอด $s$ ไปยังจุดยอดใด ๆ
+และ หาระยะทางที่สั้นที่สุดจากจุดยอด $t$ ไปยังจุดยอดใด ๆ ได้เช่นกัน
+
+กำหมดให้ $f(u)$ หมายถึงระยะทางที่สั้นที่สุดจากจุดยอด $s$ ไปยังจุดยอด $u$ และ  
+$g(u)$ หมายถึงระยะทางที่สั้นที่สุดจากจุดยอด $t$ ไปยังจุดยอด $u$
+
+```cpp
+struct state_t {
+  int v;
+  long double w;
+
+  state_t(int _v, long double _w):
+    v(_v), w(_w) {}
+  bool operator < (const state_t &o) const {
+    return w > o.w;
+  }
+};
+
+vector<pair<int, long double>> adj[N];
+long double C[N];
+
+long double squared(long double x) {
+  return x * x;
+}
+
+// simple dijkstra's algorithm
+void dijkstra(int s, long double *dist) {
+  for(int i=0; i<N; ++i) {
+    dist[i] = INF;
+  }
+
+  std::priority_queue<state_t> pq;
+  pq.emplace(s, dist[s] = 0);
+  while(!pq.empty()) {
+    state_t cur = pq.top();
+    pq.pop();
+    if(cur.w > dist[cur.v]) {
+      continue;
+    }
+    for(auto [v, c]: adj[cur.v]) {
+      long double nxt = cur.w + squared(H[cur.v] - H[v]) * c;
+      if(dist[v] > nxt) {
+        pq.emplace(v, dist[v] = nxt);
+      }
+    }
+  }
+}
+
+// dijkstra(s, f);
+// dijkstra(t, g);
+```
+
+ในการทำงานของ Dijkstra's Algorith จะใช้เวลาในการทำงาน $O((N + M) \log N)$
+
+ในการหาค่าระยะทางที่สั้นที่สุดจากจุดยอด $s$ ไปยังจุดยอด $t$ จะมี 2 กรณี
+
+1. ไม่ใช้เครื่องวาร์ป $\rightarrow$ จะได้ระยะทางที่สั้นที่สุดเป็น $f(t)$
+2. ใช้เครื่องวาร์ป $\rightarrow$ จะได้ระยะทางที่สั้นที่สุดเป็น $f(x) + K \cdot (H_{u} - H_{x})^2 + g(x)$ สำหรับจุดยอด $x$ ใด ๆ
+
+ดังนั้นสามารถเขียนในรูปของสมการ Dynamic Programming ได้ว่า
+
+$$
+min\_dist = \min_{x \in V, y \in V} (f(x) + K \cdot (H_{x} - H_{y})^2 + g(y))
+$$
+
+```cpp
+long double min_dist = f[t];
+
+for(int x=0; x<N; ++x) {
+  for(int y=0; y<N; ++y) {
+    long double cur_dist = f[x] + K * squared(H[x] - H[y]) + g[y];
+    min_dist = min(min_dist, cur_dist);
+  }
+}
+```
+
+ในการทำงานของสมการ Dynamic Programming จะใช้เวลา $O(N^2)$
+
+ทำให้เวลาในการทำงานทั้งหมดของปัญหาย่อยนี้จะเป็น $O((N + M) \log N + N^2)$
+
+## ปัญหาเต็ม
+
+จากปัญหาย่อยก่อนหน้า สังเกตได้ว่าสามารถในสมการ Dynamic Programming สามารทำการ Optimize
+ได้ด้วยการใช้ Convex Hull Trick หรือ Li Chao's Tree
+
+โดยพิจารณา $L(x) = (f(x) + K \cdot (H_{x} - H_{y})^2 + g(y))$ จะได้ว่า
+
+$$
+\begin{align*}
+L(x) &= f(x) + K \cdot (H_{x} - H_{y})^2 + g(y) \\
+&= f(x) + K \cdot (H_{x}^2 - 2 H_{x} H_{y} + H_{y}^2) + g(y) \\
+&= f(x) + K \cdot H_{x}^2 - 2 K H_{x} H_{y} + g(y) + K \cdot H_{y}^2 \\
+&= (f(x) + K \cdot H_{x}^2) - 2 K H_{y} H_{x} + (g(y) + K \cdot H_{y}^2)
+\end{align*}
+$$
+
+ดังนั้นสามารถเขียนเป็นรูปของเส้นตรงได้ว่า
+
+$$
+L(x) = A \cdot x + B
+$$
+
+โดยที่
+
+$$
+A = -2 K H_{y}
+$$
+
+และ
+
+$$
+B = f(x) + K \cdot H_{x}^2 + g(y) + K \cdot H_{y}^2
+$$
+
+เมื่อ $x = H_{x}$
