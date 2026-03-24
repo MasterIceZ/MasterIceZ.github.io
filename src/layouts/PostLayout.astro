@@ -1,5 +1,5 @@
 ---
-import { ViewTransitions } from "astro:transitions";
+import { ClientRouter } from "astro:transitions";
 
 import "@fontsource/ibm-plex-sans-thai";
 import "@fontsource/ibm-plex-sans-thai/700.css";
@@ -22,7 +22,7 @@ const { frontmatter } = Astro.props;
     />
     <meta name="generator" content={Astro.generator} />
     <title>Garden | {frontmatter.title}</title>
-    <ViewTransitions />
+    <ClientRouter />
   </head>
   <body transition:animate="slide">
     <div
@@ -80,7 +80,7 @@ const { frontmatter } = Astro.props;
     .lemma-box {
       overflow-x: auto;
       max-width: 100%;
-      white-space: nowarp;
+      white-space: nowrap;
     }
   }
 </style>

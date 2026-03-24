@@ -1,5 +1,5 @@
 ---
-import { ViewTransitions } from "astro:transitions";
+import { ClientRouter } from "astro:transitions";
 
 import "@fontsource/ibm-plex-sans-thai";
 import "@fontsource/ibm-plex-sans-thai/500.css";
@@ -20,7 +20,7 @@ import "@fontsource/fira-sans/700.css";
     <meta name="generator" content={Astro.generator} />
     <title>Study | Borworntat D.</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <ViewTransitions />
+    <ClientRouter />
   </head>
   <body>
     <slot transition:persist />
