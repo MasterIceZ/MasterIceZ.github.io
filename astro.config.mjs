@@ -1,20 +1,25 @@
 import { defineConfig } from "astro/config";
 
-import tailwind from "@astrojs/tailwind";
 import react from "@astrojs/react";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
+import tailwindcss from "@tailwindcss/vite";
 
-import { rehypeHeadingIds } from "@astrojs/markdown-remark";
+import { rehypeHeadingIds, unified } from "@astrojs/markdown-remark";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 
 // https://astro.build/config
 export default defineConfig({
   site: "https://mastericez.github.io",
-  integrations: [tailwind(), react(), mdx(), sitemap()],
+  integrations: [react(), mdx(), sitemap()],
+  vite: {
+    plugins: [tailwindcss()],
+  },
   markdown: {
-    remarkPlugins: [rehypeHeadingIds, remarkMath],
-    rehypePlugins: [rehypeKatex],
+    processor: unified({
+      remarkPlugins: [rehypeHeadingIds, remarkMath],
+      rehypePlugins: [rehypeKatex],
+    }),
   },
 });
