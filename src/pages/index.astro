@@ -1,13 +1,32 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import ProfileCard from "@/components/ProfileCard.astro";
+import DitherHero from "@/components/DitherHero.astro";
 ---
 
 <Layout title="Borworntat D.">
-  <main
-    class="h-screen w-full bg-linear-to-br dark:from-blue-900 dark:to-green-950 from-blue-300 to-green-300">
-    <div class="flex justify-center items-center h-screen w-full">
-      <ProfileCard />
-    </div>
+  <DitherHero />
+  <main class="content min-h-screen px-6 py-10 md:px-12">
+    <h2 class="font-mono text-4xl font-bold md:text-6xl">Hello there</h2>
+    <p class="mt-4 text-lg md:text-2xl">Welcome to Borworntat D.'s page</p>
   </main>
 </Layout>
+
+<style>
+  :global(body) {
+    background: var(--dh-paper);
+    color: var(--dh-ink);
+  }
+  .content {
+    position: relative;
+  }
+  /* Leave room for the docked panel: a left column on desktop, a top band on mobile. */
+  :global(html.js) .content {
+    padding-top: calc(30vh + 2.5rem);
+  }
+  @media (min-width: 768px) {
+    :global(html.js) .content {
+      margin-left: 40vw;
+      padding-top: 2.5rem;
+    }
+  }
+</style>

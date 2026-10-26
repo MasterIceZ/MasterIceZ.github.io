@@ -1,0 +1,530 @@
+---
+// Each palette is a k-means of its photo after that photo's saturation/contrast boost, dark → light.
+const photos = [
+  {
+    src: "/typewriter.jpg",
+    alt: "Dithered photo of a typewriter at the National Science Museum Thailand",
+    caption: "typewriter · National Science Museum Thailand · photo by me",
+    focus: [0.4, 0.62],
+    saturation: 1.8,
+    contrast: 1.2,
+    palette: ["#2a2d30", "#6a7770", "#aa8b85", "#d5b1ac", "#f6dbdf", "#fff8fc"],
+  },
+  {
+    src: "/dinosaur.jpg",
+    alt: "Dithered photo of a dinosaur model at the National Science Museum Thailand",
+    caption: "dinosaur · National Science Museum Thailand · photo by me",
+    focus: [0.4, 0.5],
+    saturation: 1.2,
+    contrast: 1.1,
+    palette: ["#180111", "#6f110e", "#4a3ea6", "#f14f5d", "#faa879", "#fde4b1"],
+  },
+  {
+    src: "/me.jpg",
+    alt: "Dithered selfie of Borworntat at home",
+    caption: "me · at home",
+    focus: [0.44, 0.55],
+    saturation: 1.2,
+    contrast: 1.1,
+    palette: ["#191e1f", "#254654", "#665114", "#5b685c", "#788a76", "#ce9e7f", "#89b6ba", "#f3c8a8"],
+  },
+];
+---
+
+<script is:inline>
+  document.documentElement.classList.add("js");
+</script>
+
+<div class="dh-spacer" data-dh-spacer>
+  <div class="dh-panel" data-dh-panel>
+    <canvas
+      class="dh-canvas"
+      role="img"
+      aria-label={photos[0].alt}
+      data-dh-canvas
+      data-photos={JSON.stringify(photos)}></canvas>
+    <noscript>
+      <img class="dh-fallback" src={photos[0].src} alt={photos[0].alt} />
+    </noscript>
+    <div class="dh-label">
+      <h1 class="dh-name" data-dh-name>
+        <span>Borworntat</span><br /><span>Dendumrongkul</span>
+      </h1>
+      <p class="dh-caption">
+        <span data-dh-caption>{photos[0].caption}</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<style>
+  :root {
+    --dh-ink: #2a2d30;
+    --dh-paper: #fff8fc;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --dh-ink: #f6dbdf;
+      --dh-paper: #17191b;
+    }
+  }
+
+  /* Takes one screen of scroll; the panel docks while it scrolls past. */
+  .dh-spacer {
+    position: relative;
+    height: 100vh;
+  }
+  .dh-panel {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: var(--dh-paper);
+    z-index: 10;
+  }
+  :global(html.js) .dh-panel {
+    position: fixed;
+    inset: 0 auto auto 0;
+    width: 100%;
+    height: 100vh;
+  }
+
+  .dh-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    image-rendering: pixelated;
+    will-change: transform;
+  }
+  .dh-fallback {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 40% 62%;
+  }
+
+  .dh-label {
+    position: absolute;
+    left: 1.5rem;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    font-family: ui-monospace, Menlo, Monaco, "Courier New", monospace;
+    color: var(--dh-ink);
+  }
+  .dh-name {
+    width: max-content;
+    font-size: clamp(2.25rem, 6vw, 6rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    transform-origin: bottom left;
+  }
+  .dh-name > span,
+  .dh-caption > span {
+    background: var(--dh-paper);
+    padding: 0 0.25em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+  .dh-caption {
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    line-height: 1.6;
+  }
+</style>
+
+<script>
+  type Rgb = readonly [number, number, number];
+  type Photo = {
+    src: string;
+    alt: string;
+    caption: string;
+    focus: [number, number];
+    saturation: number;
+    contrast: number;
+    palette: string[];
+  };
+  // Packed RGBA per pixel.
+  type Frame = Uint32Array;
+
+  const CELL_DESKTOP = 3;
+  const CELL_MOBILE = 2;
+  const DOCK_DESKTOP = 0.4;
+  const DOCK_MOBILE = 0.3;
+  const HOLD_MS = 6000;
+  const DISSOLVE_MS = 1500;
+  const BAYER_SPREAD = 0.18;
+
+  const spacer = document.querySelector<HTMLElement>("[data-dh-spacer]")!;
+  const panel = document.querySelector<HTMLElement>("[data-dh-panel]")!;
+  const canvas = document.querySelector<HTMLCanvasElement>("[data-dh-canvas]")!;
+  const nameEl = document.querySelector<HTMLElement>("[data-dh-name]")!;
+  const captionEl = document.querySelector<HTMLElement>("[data-dh-caption]")!;
+  const ctx = canvas.getContext("2d")!;
+
+  const desktopMq = matchMedia("(min-width: 768px)");
+  const reducedMq = matchMedia("(prefers-reduced-motion: reduce)");
+
+  // ImageData is RGBA bytes, i.e. ABGR as a little-endian u32.
+  const pack = ([r, g, b]: Rgb) =>
+    ((255 << 24) | (Math.round(b * 255) << 16) | (Math.round(g * 255) << 8) | Math.round(r * 255)) >>> 0;
+  const parseHex = (hex: string): Rgb => {
+    const n = parseInt(hex.trim().slice(1), 16);
+    return [(n >> 16) / 255, ((n >> 8) & 0xff) / 255, (n & 0xff) / 255];
+  };
+
+  const photos = (JSON.parse(canvas.dataset.photos!) as Photo[]).map((photo) => {
+    const palette = photo.palette.map(parseHex);
+    return { ...photo, palette, packed: Uint32Array.from(palette, pack) };
+  });
+  type Source = (typeof photos)[number];
+
+  // ---- dithering ----------------------------------------------------------
+
+  function nearest(palette: readonly Rgb[], r: number, g: number, b: number): number {
+    let best = 0;
+    let bestD = Infinity;
+    for (let k = 0; k < palette.length; k++) {
+      const [pr, pg, pb] = palette[k];
+      const d = (r - pr) ** 2 + (g - pg) ** 2 + (b - pb) ** 2;
+      if (d < bestD) {
+        bestD = d;
+        best = k;
+      }
+    }
+    return best;
+  }
+
+  function bayerMatrix(n: number): Float32Array {
+    const seed = [[0, 2], [3, 1]];
+    let m = seed;
+    while (m.length < n) {
+      const s = m.length;
+      m = Array.from({ length: s * 2 }, (_, y) =>
+        Array.from({ length: s * 2 }, (_, x) =>
+          4 * m[y % s][x % s] + seed[Math.floor(y / s)][Math.floor(x / s)],
+        ),
+      );
+    }
+    return Float32Array.from(m.flat(), (v) => (v + 0.5) / (n * n));
+  }
+  const BAYER8 = bayerMatrix(8);
+
+  function bayer(src: Source, rgb: Float32Array, w: number, h: number): Frame {
+    const out = new Uint32Array(w * h);
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const i = y * w + x;
+        const o = (BAYER8[(y & 7) * 8 + (x & 7)] - 0.5) * BAYER_SPREAD;
+        out[i] = src.packed[nearest(src.palette, rgb[i * 3] + o, rgb[i * 3 + 1] + o, rgb[i * 3 + 2] + o)];
+      }
+    }
+    return out;
+  }
+
+  // [dx, dy, weight]
+  type Kernel = readonly (readonly [number, number, number])[];
+  const FLOYD_STEINBERG: Kernel = [[1, 0, 7], [-1, 1, 3], [0, 1, 5], [1, 1, 1]];
+  const ATKINSON: Kernel = [[1, 0, 1], [2, 0, 1], [-1, 1, 1], [0, 1, 1], [1, 1, 1], [0, 2, 1]];
+
+  function diffuse(src: Source, rgb: Float32Array, w: number, h: number, kernel: Kernel, divisor: number): Frame {
+    const buf = Float32Array.from(rgb);
+    const out = new Uint32Array(w * h);
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const i = y * w + x;
+        const k = nearest(src.palette, buf[i * 3], buf[i * 3 + 1], buf[i * 3 + 2]);
+        out[i] = src.packed[k];
+        for (let c = 0; c < 3; c++) {
+          const err = (buf[i * 3 + c] - src.palette[k][c]) / divisor;
+          for (const [dx, dy, wgt] of kernel) {
+            const xx = x + dx;
+            const yy = y + dy;
+            if (xx >= 0 && xx < w && yy < h) buf[(yy * w + xx) * 3 + c] += err * wgt;
+          }
+        }
+      }
+    }
+    return out;
+  }
+
+  const ALGORITHMS: ((src: Source, rgb: Float32Array, w: number, h: number) => Frame)[] = [
+    (src, rgb, w, h) => diffuse(src, rgb, w, h, ATKINSON, 8),
+    (src, rgb, w, h) => diffuse(src, rgb, w, h, FLOYD_STEINBERG, 16),
+    bayer,
+  ];
+
+  // Cover-fit a photo into a w×h grid around its focus. Returns boosted RGB in [0, 1]
+  // and where the focus landed, as a fraction of the grid.
+  function sample(src: Source, img: HTMLImageElement, w: number, h: number) {
+    const [fx, fy] = src.focus;
+    const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+    const sw = w / scale;
+    const sh = h / scale;
+    const sx = Math.min(Math.max(fx * img.naturalWidth - sw / 2, 0), img.naturalWidth - sw);
+    const sy = Math.min(Math.max(fy * img.naturalHeight - sh / 2, 0), img.naturalHeight - sh);
+
+    const off = document.createElement("canvas");
+    off.width = w;
+    off.height = h;
+    const octx = off.getContext("2d", { willReadFrequently: true })!;
+    octx.imageSmoothingQuality = "high";
+    octx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+    const { data } = octx.getImageData(0, 0, w, h);
+
+    const rgb = new Float32Array(w * h * 3);
+    for (let i = 0; i < w * h; i++) {
+      const r = data[i * 4] / 255;
+      const g = data[i * 4 + 1] / 255;
+      const b = data[i * 4 + 2] / 255;
+      const l = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      for (const [c, v] of [r, g, b].entries()) {
+        const saturated = l + (v - l) * src.saturation;
+        rgb[i * 3 + c] = Math.min(Math.max((saturated - 0.5) * src.contrast + 0.5, 0), 1);
+      }
+    }
+    const landed = [((fx * img.naturalWidth - sx) * scale) / w, ((fy * img.naturalHeight - sy) * scale) / h];
+    return { rgb, landed };
+  }
+
+  // ---- frames -------------------------------------------------------------
+
+  // The photo changes every step and the algorithm once per round of photos,
+  // so the cycle covers every pairing.
+  const STEPS = photos.length * ALGORITHMS.length;
+  const photoAt = (step: number) => step % photos.length;
+  const algorithmAt = (step: number) => Math.floor(step / photos.length) % ALGORITHMS.length;
+
+  let images: HTMLImageElement[] = [];
+  let gridW = 0;
+  let gridH = 0;
+  let cellCss = CELL_DESKTOP;
+  let samples: Float32Array[] = [];
+  // Where each photo's focus landed on the grid, and which photo the docked panel centres on.
+  let landed: number[][] = [];
+  let anchored = 0;
+  let panelW = 0;
+  let panelH = 0;
+  let cache = new Map<number, Frame>();
+  let blank: Frame = new Uint32Array(0);
+  let rank = new Float32Array(0);
+  let image: ImageData | null = null;
+  let pixels = new Uint32Array(0);
+  let current = 0;
+  let shown: Frame = blank;
+
+  // Dithered lazily: only the frames the cycle has reached since the last resize.
+  function frameAt(step: number): Frame {
+    let frame = cache.get(step);
+    if (!frame) {
+      const p = photoAt(step);
+      frame = ALGORITHMS[algorithmAt(step)](photos[p], samples[p], gridW, gridH);
+      cache.set(step, frame);
+    }
+    return frame;
+  }
+
+  function draw(from: Frame, to: Frame, t: number) {
+    if (!image) return;
+    for (let i = 0; i < pixels.length; i++) pixels[i] = rank[i] < t ? to[i] : from[i];
+    ctx.putImageData(image, 0, 0);
+  }
+
+  function label(step: number) {
+    const photo = photos[photoAt(step)];
+    captionEl.textContent = photo.caption;
+    canvas.setAttribute("aria-label", photo.alt);
+  }
+
+  function show() {
+    shown = frameAt(current);
+    anchored = photoAt(current);
+    label(current);
+    draw(shown, shown, 0);
+    layout();
+  }
+
+  // Re-sample when the viewport needs a different grid. Returns whether it did.
+  function resetFrames(): boolean {
+    if (!images.length) return false;
+    const dpr = window.devicePixelRatio || 1;
+    const cell = desktopMq.matches ? CELL_DESKTOP : CELL_MOBILE;
+    cellCss = Math.max(1, Math.round(cell * dpr)) / dpr;
+
+    const w = Math.ceil(document.documentElement.clientWidth / cellCss);
+    const h = Math.ceil(Math.max(window.innerHeight, spacer.offsetHeight) / cellCss);
+    if (w === gridW && h === gridH) return false;
+    gridW = w;
+    gridH = h;
+
+    canvas.width = w;
+    canvas.height = h;
+    canvas.style.width = `${w * cellCss}px`;
+    canvas.style.height = `${h * cellCss}px`;
+
+    const sampled = photos.map((photo, i) => sample(photo, images[i], w, h));
+    samples = sampled.map((s) => s.rgb);
+    landed = sampled.map((s) => s.landed);
+    cache = new Map();
+
+    // The load-in dissolve starts from the page background, so dark mode doesn't flash.
+    const paper = getComputedStyle(document.documentElement).getPropertyValue("--dh-paper");
+    blank = new Uint32Array(w * h).fill(pack(parseHex(paper)));
+    rank = Float32Array.from({ length: w * h }, () => Math.random());
+    image = ctx.createImageData(w, h);
+    pixels = new Uint32Array(image.data.buffer);
+    return true;
+  }
+
+  // ---- cycling ------------------------------------------------------------
+
+  let holdTimer = 0;
+  let dissolveRaf = 0;
+
+  // Each pixel flips at its own random moment, so every frame stays within the palettes.
+  function dissolve(from: Frame, to: Frame, ms: number, done: () => void) {
+    const start = performance.now();
+    const step = (now: number) => {
+      const t = Math.min((now - start) / ms, 1);
+      draw(from, to, t * t * (3 - 2 * t));
+      if (t < 1) dissolveRaf = requestAnimationFrame(step);
+      else done();
+    };
+    dissolveRaf = requestAnimationFrame(step);
+  }
+
+  function dissolveTo(next: number, from: Frame) {
+    const to = frameAt(next);
+    const photo = photoAt(next);
+    current = next;
+    const switchPhoto = () => {
+      anchored = photo;
+      label(next);
+      layout();
+    };
+    const finish = () => {
+      dissolveRaf = 0;
+      shown = to;
+      startCycle();
+    };
+    // If the panel crops the next photo elsewhere, pass through the background so the
+    // canvas can move while nothing is showing.
+    if (canvasShift(photo) === canvasShift(anchored)) {
+      switchPhoto();
+      dissolve(from, to, DISSOLVE_MS, finish);
+    } else {
+      dissolve(from, blank, DISSOLVE_MS / 2, () => {
+        switchPhoto();
+        dissolve(blank, to, DISSOLVE_MS / 2, finish);
+      });
+    }
+  }
+
+  function startCycle() {
+    if (!gridW || reducedMq.matches || document.hidden || holdTimer || dissolveRaf) return;
+    holdTimer = window.setTimeout(() => {
+      holdTimer = 0;
+      dissolveTo((current + 1) % STEPS, shown);
+    }, HOLD_MS);
+  }
+
+  function stopCycle() {
+    clearTimeout(holdTimer);
+    holdTimer = 0;
+    if (dissolveRaf) {
+      cancelAnimationFrame(dissolveRaf);
+      dissolveRaf = 0;
+      show();
+    }
+  }
+
+  // ---- scroll docking -----------------------------------------------------
+
+  const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+  // Snap a translation to whole cells, keeping the canvas covering the panel.
+  function shift(panelSize: number, gridSize: number, focus: number) {
+    const canvasSize = gridSize * cellCss;
+    const want = panelSize / 2 - focus * canvasSize;
+    const min = Math.ceil((panelSize - canvasSize) / cellCss);
+    return Math.min(Math.max(Math.round(want / cellCss), min), 0) * cellCss;
+  }
+
+  // Centre the panel on a photo's focus.
+  function canvasShift(photo: number) {
+    if (!gridW) return "none";
+    const [fx, fy] = landed[photo];
+    return `translate(${shift(panelW, gridW, fx)}px, ${shift(panelH, gridH, fy)}px)`;
+  }
+
+  function layout() {
+    const vw = document.documentElement.clientWidth;
+    const vh = window.innerHeight;
+    let p = Math.min(Math.max(window.scrollY / spacer.offsetHeight, 0), 1);
+    if (reducedMq.matches) p = p < 0.5 ? 0 : 1;
+
+    const desktop = desktopMq.matches;
+    const dockW = desktop ? vw * DOCK_DESKTOP : vw;
+    const dockH = desktop ? vh : vh * DOCK_MOBILE;
+    panelW = lerp(vw, dockW, p);
+    panelH = lerp(vh, dockH, p);
+    panel.style.width = `${panelW}px`;
+    panel.style.height = `${panelH}px`;
+    canvas.style.transform = canvasShift(anchored);
+
+    const fit = Math.min(1, (dockW - 48) / nameEl.offsetWidth, (dockH * 0.25) / nameEl.offsetHeight);
+    nameEl.style.transform = `scale(${lerp(1, fit, p)})`;
+  }
+
+  let layoutRaf = 0;
+  function requestLayout() {
+    if (!layoutRaf)
+      layoutRaf = requestAnimationFrame(() => {
+        layoutRaf = 0;
+        layout();
+      });
+  }
+
+  // ---- wiring -------------------------------------------------------------
+
+  let resizeTimer = 0;
+  function onResize() {
+    requestLayout();
+    clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(() => {
+      stopCycle();
+      if (resetFrames()) show();
+      layout();
+      startCycle();
+    }, 150);
+  }
+
+  window.addEventListener("scroll", requestLayout, { passive: true });
+  window.addEventListener("resize", onResize);
+  desktopMq.addEventListener("change", onResize);
+  reducedMq.addEventListener("change", () => {
+    stopCycle();
+    startCycle();
+    requestLayout();
+  });
+  document.addEventListener("visibilitychange", () => (document.hidden ? stopCycle() : startCycle()));
+
+  layout();
+
+  Promise.all(
+    photos.map((photo) => {
+      const img = new Image();
+      img.src = photo.src;
+      return img.decode().then(() => img);
+    }),
+  )
+    .then((loaded) => {
+      images = loaded;
+      resetFrames();
+      layout();
+      if (reducedMq.matches) show();
+      else dissolveTo(current, blank);
+    })
+    // Decorative only: if a photo can't load, the panel stays plain paper.
+    .catch(() => {});
+</script>
